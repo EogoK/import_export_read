@@ -1,2 +1,3 @@
 ﻿  Source.cpp
+c:\users\user\source\repos\import_export_read\import_export_read\rwfile.h(99): warning C4715: 'CreateFileZW::fmzpeopt': not all control paths return a value
   import_export_read.vcxproj -> C:\Users\User\source\repos\import_export_read\Debug\import_export_read.exe
