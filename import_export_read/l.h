@@ -2,5 +2,6 @@
 #include <iostream>
 #include <string>
 #include <cstdio>
+#include <algorithm>
 #include <Windows.h>
 using namespace std;

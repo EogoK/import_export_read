@@ -5,6 +5,8 @@
 
 
 int main(int argc, char *argv[]) {
-	CreateFileZW czw("file.exe");
+
+
+	CreateFileZW czw("dec.exe");
 	return 0;
 }
