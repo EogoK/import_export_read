@@ -11,8 +11,8 @@ public:
 
 private:
 
-	int ie_search(FILE *file, string str) {
-		int n = 0, c = 0;
+	unsigned long ie_search(FILE *file, string str) {
+		int n = 0, c = 0, cp = ftell(file);
 		cout << hex;
 		cout << "VA " << str << " " ;
 		for (int i = 0; i < 8; i++) {
@@ -31,16 +31,20 @@ private:
 		}
 		if (n == 8) {
 			cout << endl;
-			return 1;
+			return 0;
 		}
 		cout << endl;
 		cout << dec;
-		return 0;
+		fseek(file, cp, SEEK_SET);
+		unsigned int rva = data_to_real(file, 4, ftell(file));
+		fseek(file, 8, SEEK_CUR);
+		return rva;
+
 	}
 
-	string sort_section_header(FILE *file, string str, string section_name, int numberOfSections) {
+	string sort_section_header(FILE *file, string str, string section_name, int numberOfSections, unsigned int rva_idata) {
 		int cp = ftell(file);
-		int tableSize = 0;
+		unsigned long tableSize = 0;
 		unsigned long VAsec = 0, RAWsec = 0;
 		cout << hex;
 		cout << endl << "section header ("+str+"): " << endl;
@@ -55,35 +59,22 @@ private:
 		}
 		int n = 0, st = 0;
 		while (numberOfSections) {
-			n = 0;
-			for (int i = 0; i < 8; i++) {
-				st = fgetc(file);
-				cout << (char)st << "";
-				if ((st == (int)sn[i]) || ((st == 0) && (sn[i] == ' '))) {
-					n++;
-				}
-			}
-			if (n == 8) {
-				cout << "nice "+section_name << endl;
+			
+			fseek(file, 12, SEEK_CUR);
+			VAsec = data_to_real(file, 4, ftell(file));
+			cout <<"VAsec: " << VAsec << endl;
+			fseek(file, 4, SEEK_CUR);
+			tableSize= data_to_real(file, 4, ftell(file));
+			cout << "tableSize: " << tableSize << endl;
+			fseek(file, 4, SEEK_CUR);
+			RAWsec = data_to_real(file, 4, ftell(file));
+			cout << "RAWsec: " << RAWsec << endl;
 
-				fseek(file, 4, SEEK_CUR);
-				VAsec = data_to_real(file, 4, ftell(file));
-
-				fseek(file, 4, SEEK_CUR);
-				tableSize = data_to_real(file, 4, ftell(file));
-
-				fseek(file, 4, SEEK_CUR);
-				RAWsec = data_to_real(file, 4, ftell(file));
-
-				fseek(file, RAWsec, SEEK_SET);
-
-				ImportFuncCheck imp(file, RAWsec, VAsec);
-
+			if (VAsec == rva_idata || numberOfSections == 1) {
+				ImportFuncCheck impor(file, RAWsec, VAsec);
 				break;
 			}
-			else {
-				fseek(file, 32, SEEK_CUR);
-			}
+			fseek(file, 20, SEEK_CUR);
 			cout << endl;
 			numberOfSections--;
 		}
@@ -126,15 +117,15 @@ private:
 
 									fseek(file, 112, SEEK_CUR);
 
-									if (!e) {
-										sort_section_header(file, "export", ".edata", NumberOfSections);
+									if (e != 0) {
+										sort_section_header(file, "export", ".edata", NumberOfSections, e);
 									}
 									else {
 										cout << "export table not found" << endl;
 									}
 
-									if (!i) {
-										sort_section_header(file, "import", ".idata", NumberOfSections);
+									if (i != 0) {
+										sort_section_header(file, "import", ".idata", NumberOfSections, i);
 									}
 									else {
 										cout << "import table not found" << endl;
@@ -148,19 +139,19 @@ private:
 
 									cout << ftell(file) << endl;
 
-									int e = ie_search(file, "export 0x20b");//export
-									int i = ie_search(file, "import 0x20b");//import
+									unsigned long e = ie_search(file, "export 0x20b");//export
+									unsigned long i = ie_search(file, "import 0x20b");//import
 
 									fseek(file, 112, SEEK_CUR);
-									if (!e) {
-										sort_section_header(file, "export", ".edata", NumberOfSections);
+									if (e != 0) {
+										sort_section_header(file, "export", ".edata", NumberOfSections, e);
 									}
 									else {
 										cout << "export table not found" << endl;
 									}
 
-									if (!i) {
-										sort_section_header(file, "import", ".idata", NumberOfSections);
+									if (i != 0) {
+										sort_section_header(file, "import", ".idata", NumberOfSections, i);
 									}
 									else {
 										cout << "import table not found" << endl;

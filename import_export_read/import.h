@@ -31,12 +31,14 @@ private:
 
 	void StandartImportFunc(FILE *file) {
 		cout << hex;
+		fseek(file, raw_offset_s, SEEK_SET);
 		long long OriginalFirstTnunk = 0, FirstThunk = 0, TimeDateStamp = 0, ForwarderChain = 0;
 		long Name = 0;
 		unsigned long temp = 0;
 		int t2 = 0;
 		while (1) {
 			temp = 0;
+			cout << endl;
 			cout << "i tut: " << ftell(file) << endl;
 			OriginalFirstTnunk = RvaToRaw(file, 4, va_offset_s, raw_offset_s, temp);
 			cout << "OriginalFirstThunk: " << OriginalFirstTnunk << " " << temp << endl;
