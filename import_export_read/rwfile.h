@@ -45,7 +45,7 @@ private:
 	string sort_section_header(FILE *file, string str, string section_name, int numberOfSections, unsigned int rva_idata) {
 		int cp = ftell(file);
 		unsigned long tableSize = 0;
-		unsigned long VAsec = 0, RAWsec = 0;
+		unsigned long VAsec = 0, RAWsec = 0, temp = 0;
 		cout << hex;
 		cout << endl << "section header ("+str+"): " << endl;
 		string sn;
@@ -70,12 +70,13 @@ private:
 			RAWsec = data_to_real(file, 4, ftell(file));
 			cout << "RAWsec: " << RAWsec << endl;
 
-			if (VAsec == rva_idata || numberOfSections == 1) {
+			if (VAsec == rva_idata || ((temp < VAsec) && (VAsec > rva_idata))) {
 				ImportFuncCheck impor(file, RAWsec, VAsec);
 				break;
 			}
 			fseek(file, 20, SEEK_CUR);
 			cout << endl;
+			temp = VAsec;
 			numberOfSections--;
 		}
 
